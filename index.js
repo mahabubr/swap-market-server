@@ -37,6 +37,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
         const productCollection = client.db('SWAP-MARKET').collection('products')
+        const deleteCollection = client.db('SWAP-MARKET').collection('deleted-items')
 
         app.post('/jwt', (req, res) => {
             const user = req.body;
@@ -98,6 +99,31 @@ async function run() {
             const id = req.params.id
             const query = { _id: new ObjectId(id) }
             const result = await productCollection.deleteOne(query)
+            res.send(result)
+        })
+
+        app.post('/deleted-items', async (req, res) => {
+            const query = req.body
+            const result = await deleteCollection.insertOne(query)
+            res.send(result)
+        })
+        app.get('/deleted-items', async (req, res) => {
+            const query = {}
+            const result = await deleteCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        app.get('/deleted-items/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const service = await deleteCollection.findOne(query)
+            res.send(service)
+        })
+
+        app.delete('/deleted-items/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await deleteCollection.deleteOne(query)
             res.send(result)
         })
 
